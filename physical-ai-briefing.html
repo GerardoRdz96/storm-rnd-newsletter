@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STORM Briefing — The future of physical AI in robotics — where embodied foundation models (vision-language-action models), world models, and simulation are actually headed over the next 3-5 years, and what is genuinely real and deployable vs hype.</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a1019; --ink-2:#0e1726; --line:#1f3146; --line-2:#2a405a;
+    --fog:#a8bdd4; --fog-dim:#6e8299; --paper:#eaf2fb;
+    --teal:#3fd9c0; --teal-deep:#1b8f80; --amber:#f6b24b; --rust:#e06a52; --sky:#5aa9f0;
+    --glow: 0 0 0 1px #ffffff08, 0 18px 50px -24px #00000099;
+    --serif:"Fraunces",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--mono);color:var(--fog);background:var(--ink);line-height:1.6;
+    -webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+  .atmos{position:fixed;inset:0;z-index:-2;pointer-events:none;
+    background:
+      radial-gradient(120% 80% at 12% -10%, #16324a 0%, transparent 55%),
+      radial-gradient(90% 70% at 100% 0%, #1a2b1f 0%, transparent 50%),
+      radial-gradient(140% 120% at 50% 120%, #0c1a2c 0%, transparent 60%),
+      linear-gradient(180deg,#0a1019,#080d15);}
+  .isobars{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1100' height='700' viewBox='0 0 1100 700'><g fill='none' stroke='%23274057' stroke-width='1' opacity='0.5'><path d='M-50 120 C 200 60 380 200 600 130 S 980 40 1180 150'/><path d='M-50 200 C 220 150 400 280 620 210 S 1000 130 1180 230'/><path d='M-50 290 C 240 250 420 360 640 300 S 1010 230 1180 320'/><path d='M-50 390 C 250 360 430 460 660 400 S 1020 340 1180 420'/><path d='M-50 500 C 260 480 440 560 670 510 S 1030 450 1180 530'/><path d='M-50 610 C 270 600 450 660 690 620 S 1040 570 1180 640'/></g></svg>");
+    background-size:cover;mask-image:radial-gradient(120% 100% at 50% 0%, #000 30%, transparent 85%);}
+  .grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+  .wrap{max-width:920px;margin:0 auto;padding:clamp(28px,6vw,72px) clamp(20px,5vw,56px) 80px}
+
+  .masthead{display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--mono);font-size:11px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--fog-dim);border-bottom:1px solid var(--line);padding-bottom:14px}
+  .masthead .mark{display:flex;align-items:center;gap:10px;color:var(--teal)}
+  .mark .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal);animation:pulse 3s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .verified{display:inline-flex;align-items:center;gap:7px;color:var(--teal);
+    border:1px solid var(--teal-deep);border-radius:999px;padding:5px 13px;
+    font-size:10.5px;letter-spacing:.22em;background:#0d2a2710}
+  .verified svg{width:13px;height:13px}
+  .topic{font-family:var(--serif);font-optical-sizing:auto;font-weight:560;
+    font-size:clamp(34px,6.4vw,62px);line-height:1.02;letter-spacing:-.015em;
+    color:var(--paper);margin:34px 0 18px;max-width:18ch}
+  .dossier{display:flex;flex-wrap:wrap;gap:10px 34px;font-size:12.5px;color:var(--fog)}
+  .dossier .k{color:var(--fog-dim);text-transform:uppercase;letter-spacing:.18em;font-size:10.5px}
+  .dossier b{color:var(--paper);font-weight:500}
+  .readout{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:30px;
+    background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .readout div{background:var(--ink-2);padding:16px 18px}
+  .readout .n{font-family:var(--serif);font-size:30px;color:var(--teal);line-height:1;font-weight:600}
+  .readout .l{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--fog-dim);margin-top:8px}
+
+  section{margin-top:58px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px}
+  .sec-head .idx{font-family:var(--mono);font-size:11px;color:var(--teal);letter-spacing:.2em}
+  .sec-head h2{font-family:var(--serif);font-weight:500;font-size:23px;color:var(--paper);letter-spacing:-.01em}
+  .sec-head .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line-2),transparent)}
+
+  .brief{position:relative;border:1px solid var(--line-2);border-radius:14px;
+    padding:26px 28px 26px 30px;background:linear-gradient(180deg,#11203420,#0c18280a);box-shadow:var(--glow)}
+  .brief::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:3px;background:linear-gradient(var(--teal),var(--sky))}
+  .brief .tick{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+  .brief p{font-family:var(--serif);font-size:18.5px;line-height:1.5;color:var(--paper);font-weight:340}
+
+  .finding{border:1px solid var(--line);border-radius:13px;background:var(--ink-2);
+    padding:24px 26px;margin-bottom:16px;position:relative;transition:border-color .25s,transform .25s}
+  .finding:hover{border-color:var(--line-2);transform:translateY(-2px)}
+  .finding .top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+  .finding .rank{font-family:var(--serif);font-size:13px;color:var(--fog-dim);font-weight:600;
+    letter-spacing:.05em;border:1px solid var(--line-2);border-radius:7px;padding:3px 9px;flex:none}
+  .finding h3{font-family:var(--serif);font-size:21px;font-weight:540;color:var(--paper);line-height:1.18;letter-spacing:-.01em}
+  .finding .body{color:var(--fog);font-size:13.5px;margin-top:10px;line-height:1.72}
+  .gauge{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .gauge .segs{display:flex;gap:3px}
+  .gauge .seg{width:18px;height:9px;border-radius:2px;background:#34506b}
+  .gauge .seg.on{background:var(--teal)}
+  .gauge.mid .seg.on{background:var(--amber)}
+  .gauge.low .seg.on{background:var(--rust)}
+  .gauge .score{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--fog-dim)}
+  .gauge .score b{font-family:var(--serif);font-size:16px;color:var(--paper);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}
+  .tag{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid;display:inline-flex;gap:6px;align-items:center}
+  .tag::before{content:"";width:5px;height:5px;border-radius:50%}
+  .tag--support{color:var(--teal);border-color:var(--teal-deep)}
+  .tag--support::before{background:var(--teal)}
+  .tag--challenge{color:var(--amber);border-color:#7a5a23}
+  .tag--challenge::before{background:var(--amber)}
+
+  .assume{list-style:none;display:grid;gap:11px}
+  .assume li{display:flex;gap:14px;align-items:flex-start;font-size:13.5px;color:var(--fog);
+    border-left:1px solid var(--line-2);padding:8px 0 8px 16px}
+  .assume li::before{content:"▚";color:var(--fog-dim);font-size:12px;margin-top:2px}
+  .assume b{color:var(--paper);font-weight:500}
+
+  .missing{border:1px solid #7a5a2355;border-radius:14px;padding:24px 28px;
+    background:linear-gradient(180deg,#251c0c30,#12182810);position:relative}
+  .missing .eyebrow{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--amber);margin-bottom:10px;display:flex;gap:9px;align-items:center}
+  .missing .eyebrow .ic{width:16px;height:16px;border:1px dashed var(--amber);border-radius:50%;display:inline-block}
+  .missing h3{font-family:var(--serif);font-size:22px;color:var(--paper);font-weight:540;margin-bottom:8px}
+  .missing p{font-size:13.5px;color:var(--fog)}
+  .missing .cta{margin-top:14px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+
+  .ledger{border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  .ledger .row{display:grid;grid-template-columns:118px 1fr;gap:16px;padding:14px 20px;border-top:1px solid var(--line);align-items:center}
+  .ledger .row:first-child{border-top:none}
+  .ledger .src{font-size:12.5px;color:var(--fog)}
+  .ledger .src a{color:#82c2ff;text-decoration:none;border-bottom:1px solid #3a597a;word-break:break-word}
+  .ledger .src .note{display:block;color:var(--fog-dim);font-size:11px;margin-top:3px}
+  .st{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;display:inline-flex;gap:7px;align-items:center;font-weight:500}
+  .st::before{font-size:12px}
+  .st--confirmed{color:var(--teal)}.st--confirmed::before{content:"✓"}
+  .st--corrected{color:var(--amber)}.st--corrected::before{content:"~"}
+  .st--demoted{color:var(--rust)}.st--demoted::before{content:"✕"}
+
+  footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);
+    font-size:11px;letter-spacing:.1em;color:var(--fog-dim);line-height:1.8}
+  footer .method{color:var(--fog)}
+
+  @media (max-width:560px){
+    .readout{grid-template-columns:1fr 1fr}
+    .ledger .row{grid-template-columns:1fr}
+    .gauge .seg{width:14px}
+  }
+</style>
+</head>
+<body>
+<div class="atmos"></div><div class="isobars"></div><div class="grain"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="masthead">
+      <span class="mark"><span class="dot"></span>STORM&nbsp;·&nbsp;Research Briefing</span>
+      <span class="verified">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
+        V2 + Codex · VERIFIED
+      </span>
+    </div>
+    <h1 class="topic">The future of physical AI in robotics — where embodied foundation models (vision-language-action models), world models, and simulation are actually headed over the next 3-5 years, and what is genuinely real and deployable vs hype.</h1>
+    <div class="dossier">
+      <span><span class="k">Reader</span>&nbsp; <b>Gera — an AI-focused R&amp;D Engineer growing into Physical AI expertise; simulation-first, interested in sim2real, VLA models, and world models; strong in software/agentic AI, newer to robotics hardware.</b></span>
+      <span><span class="k">Decision</span>&nbsp; <b>Decide where to place his learning and build bets in physical AI over the next 12-18 months: what is durable vs overhyped, which sub-areas a software-strong engineer can realistically contribute to, and what to watch.</b></span>
+    </div>
+    <div class="readout">
+      <div><div class="n">5</div><div class="l">Expert lenses</div></div>
+      <div><div class="n">28</div><div class="l">Sources checked</div></div>
+      <div><div class="n">2026-06-29</div><div class="l">Generated</div></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="brief">
+      <div class="tick">⏱ 60-Second Summary</div>
+      <p>Bottom line for your 12-18 month bets: the durable, software-shaped layer is the substrate, simulation and sim2real tooling, robot-data and teleoperation pipelines, synthetic-data generation, RL fine-tuning of VLAs, and rigorous evaluation/benchmark harnesses. All five lenses arrive there independently, and it compounds no matter which hardware vendor wins. The single most-corroborated fact in the council is that today&#x27;s flagship humanoids (Optimus, NEO) are teleoperated data-collection rigs, not autonomous workers; Musk conceded it on the Q4 2025 call and 1X&#x27;s own privacy disclosure proves it. The binding constraint everywhere is action-paired data, not compute or chassis, and there is no internet of robot trajectories, so autonomy timelines bend slowly. Sim2real genuinely works for legged locomotion but the gap stays wide for contact-rich manipulation, which is Moravec&#x27;s paradox sitting exactly where the money is. &quot;World model&quot; is two things: generative-video data engines (Cosmos, Genie) usable now for synthetic data, and latent planning models (V-JEPA 2, Dreamer) still research-stage; do not conflate them. Net strategy: bet on transferable skills and the data/eval factory, treat general-purpose humanoid labor and any single company&#x27;s equity as a far-dated call option you watch rather than stake a career on. Two live debates to track: whether hardware is &quot;good enough&quot; or whether mechanical/tactile sensing is a co-equal wall, and the pace at which VLA generalization actually scales.  —  Cross-lineage review (Codex): thesis tightened to a concrete eval/safety/data portfolio; six findings demoted for overconfidence (&#x27;durable&#x27;, &#x27;the&#x27; constraint, &#x27;proves&#x27;, &#x27;never&#x27;); safety/assurance promoted from missing-lens to a core bet.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="idx">01</span><h2>Key findings, ranked by reliability</h2><span class="rule"></span></div>
+    
+    <article class="finding">
+      <div class="top">
+        <h3>The sharpest software wedge: evaluation + safety + data infrastructure for learned robot policies</h3>
+        <span class="rank">#1</span>
+      </div>
+      <p class="body">Tighten &#x27;the substrate&#x27; into a concrete 12-18mo portfolio. PRIMARY bet: robot evaluation / benchmark harnesses (most robust, software-only, hardware-light). SECONDARY: sim-to-real + synthetic-data tooling. OPPORTUNISTIC: VLA fine-tuning with open models. WATCH-ONLY: humanoid vendors, general-purpose autonomy, any single company&#x27;s equity. PROMOTE from missing-lens to a CORE bet: runtime safety / assurance for learned policies (the gate from &#x27;works in a demo&#x27; to &#x27;runs a shift safely around people&#x27;). Three buildable projects: (1) a VLA eval harness, (2) a sim data pipeline with perturbation testing, (3) a runtime safety monitor for learned policies.</p>
+      <div class="gauge ">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>8</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Practitioner</span><span class="tag tag--support">Researcher</span><span class="tag tag--support">Economist</span><span class="tag tag--support">Codex review</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>VLAs memorize more than they generalize; evaluation is underbuilt (a software opening)</h3>
+        <span class="rank">#2</span>
+      </div>
+      <p class="body">Current VLAs memorize more than they generalize and break under out-of-distribution shifts (object-layout/distractor swaps, viewpoint and initial-state changes, lighting, and unseen tasks): LIBERO-PRO shows &gt;90% standard accuracy collapsing to 0.0% under perturbations, exposing &quot;reliance on rote memorization of action sequences and environment layouts&quot; rather than genuine understanding, and LIBERO-Plus shows success dropping from 95% to below 30% under modest perturbation. The dominant failure mode is low-level execution/perception robustness rather than high-level reasoning — models are extremely sensitive to viewpoints and initial states yet &quot;largely insensitive to language&quot; (they often ignore the instruction entirely) — so &quot;execution instability, not reasoning&quot; is a fair (if author-supplied) label. Rigorous evaluation is visibly underbuilt: both papers explicitly indict current evaluation practice (&quot;severe flaws,&quot; &quot;misleading methodologies,&quot; and a &quot;need for evaluation practices that assess reliability under realistic variation&quot;), and AGNOSTOS finds VLAs &quot;struggle to generalize effectively to unseen tasks.&quot; Notably, all three cited contributions are software/simulation benchmarks built without new robot hardware — concrete evidence that this gap is being filled with software, making evaluation and benchmark harnesses a low-hardware-barrier near-term opening. The Researcher&#x27;s tempering (π0.5-style diversity-bought generalization) is a separate, uncited claim that does not contradict the memorization ceiling the three sources document.</p>
+      <div class="gauge ">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>8</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Practitioner</span><span class="tag tag--support">Researcher</span><span class="tag tag--support">Skeptic</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>General-purpose humanoids in 3-5 years are overhyped; narrow deployments are durable</h3>
+        <span class="rank">#3</span>
+      </div>
+      <p class="body">General-purpose autonomous humanoids in homes or factories on a 3-5 year horizon are overhyped. The durable near-term is narrow, structured, economically-bounded deployment: industrial material-handling, warehouse, surgical, agriculture. This is unanimous across all five lenses, with the autonomous-driving precedent as the master analogy: real tech, roughly 3-5x timeline inflation, narrow-and-geofenced first, about 20 years from DARPA 2004 (no vehicle finished the course) to a real Waymo service. Watch humanoids closely, but do not stake a 12-18 month plan on near-term general-purpose humanoid labor.  ·  Codex (cross-lineage): &#x27;durable&#x27; overstates — narrow deployment is the likely PATTERN, but durable economics (cost/uptime/safety/maintenance) are unproven.</p>
+      <div class="gauge ">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>7</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Practitioner</span><span class="tag tag--support">Researcher</span><span class="tag tag--support">Skeptic</span><span class="tag tag--support">Economist</span><span class="tag tag--support">Historian</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>The substrate is your bet: sim/sim2real, data + eval pipelines, VLA fine-tuning</h3>
+        <span class="rank">#4</span>
+      </div>
+      <p class="body">For a software-strong, simulation-first profile with light hardware, the lowest-hardware-barrier, most durable bets are the substrate: simulation and sim2real tooling, robot-data/teleoperation pipelines, synthetic-data generation, RL fine-tuning of VLAs, and rigorous evaluation/benchmark harnesses. This is software work that compounds regardless of which hardware vendor wins, and the open ecosystem lets you train, fine-tune, serve, and evaluate policies largely in sim. Primary sources confirm each technical pillar: openpi provides open-source VLA models and fine-tuning (π0/π0-FAST/π0.5, base checkpoints on 10k+ hrs, SOTA on the LIBERO sim benchmark); NVIDIA&#x27;s Isaac Lab is a GPU-accelerated simulation framework with data-collection pipelines, domain randomization, RL/imitation learning at scale, and explicit sim-to-real support; and RLinf-VLA is a unified framework for RL training of VLAs across multiple simulators and sim benchmarks (LIBERO, ManiSkill, RoboTwin). Note: OpenVLA, GR00T, and MuJoCo are named in the original but are not individually cited here, and the strategic advice to partner on controllers/grippers rather than own them is reasoned synthesis, not a sourced claim.  ·  Codex: bundles mature (eval/data tooling) with immature (RL fine-tuning of VLAs, synthetic data) bets — weight eval/data infra higher.</p>
+      <div class="gauge ">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>7</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Practitioner</span><span class="tag tag--support">Researcher</span><span class="tag tag--support">Skeptic</span><span class="tag tag--support">Economist</span><span class="tag tag--support">Historian</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>Sim2real works for locomotion; the gap stays wide for contact-rich manipulation</h3>
+        <span class="rank">#5</span>
+      </div>
+      <p class="body">Sim2real is genuinely working and deployed for legged locomotion and navigation (robust quadruped locomotion over challenging terrain, biped control, agile flight/drone racing via domain randomization), but the reality gap stays wide for contact-rich, dexterous manipulation, where inaccurate contact dynamics (friction, deformation, sticking/slipping, idealized tactile sensing) is a core driver of failure. [CORRECTION: the parenthetical &#x27;domain-randomized transfer roughly 84-93%&#x27; is NOT supported by either cited source — no such figure appears in either paper — and should be dropped. &#x27;Moravec&#x27;s paradox&#x27; is an interpretive framing of the authors, not stated in either source.] Practical read for a sim-first engineer: GPU sim (Isaac Lab, MuJoCo, Genesis) is a low-barrier, high-throughput place to build now, but treat visual/sensory realism as separate from physical (dynamics) accuracy, and expect contact-rich dexterity to still need incorporating real-world data and sim-real co-training rather than pure sim.</p>
+      <div class="gauge ">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>7</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Practitioner</span><span class="tag tag--support">Researcher</span><span class="tag tag--support">Skeptic</span><span class="tag tag--support">Economist</span><span class="tag tag--support">Historian</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>LIVE: is hardware &#x27;good enough,&#x27; or is mechanical/tactile sensing a co-equal wall?</h3>
+        <span class="rank">#6</span>
+      </div>
+      <p class="body">Live disagreement. The researcher argues hardware is good enough and the binding constraint is a learning/data problem, so you should invest in the intelligence layer. The practitioner and skeptic counter that dominant field failure modes are physical (contact/grasp failures, perception, calibration drift, and the last-10% reliability gap between a demo and a reliable shift) and that contact-rich manipulation needs tactile contact-state sensing that vision-only stacks lack. Both cited primary sources back the practitioner/skeptic side: ManiSkill-ViTac 2025 states that real-world manipulation is &quot;still far from satisfactory... especially for contact-rich scenarios,&quot; partly because &quot;most works only use vision sensing, lacking the ability to detect contact status,&quot; and the Aljalbout et al. Reality Gap survey documents contact dynamics, friction, deformables, and calibration as hard, persistent gaps. Caveat: the Reality Gap paper is specifically a sim-to-real/modeling-gap survey, so it supports &quot;physical/contact phenomena are a dominant, hard-to-bridge gap&quot; more than the literal claim &quot;robot hardware is inadequate.&quot; Edge to the practitioner/skeptic on the factual question. It barely changes the bet (all three agree the surface is software) but it qualifies the &quot;data is the only bottleneck&quot; thesis the plan leans on.</p>
+      <div class="gauge ">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>7</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Researcher</span><span class="tag tag--challenge">Practitioner</span><span class="tag tag--challenge">Skeptic</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>Data, not compute or hardware cost, is the binding constraint</h3>
+        <span class="rank">#7</span>
+      </div>
+      <p class="body">Action-paired sensorimotor data is the rate limiter on physical AI, not compute, model size, or hardware cost. It does not exist at internet scale and must be physically collected (largely via teleoperated demonstrations, which yield only on the order of tens of episodes per operator-hour — note this throughput figure is the council&#x27;s estimate, not stated in the cited sources). Open X-Embodiment, the largest open real-robot corpus, holds 1M+ trajectories spanning 22 robot embodiments, pooled from 60 datasets across 34 labs — microscopic next to the text and image corpora that made LLMs work, a gap the paper itself flags (&quot;comparably large and broad datasets for robotic interaction are hard to come by&quot;). The data-as-binding-constraint thesis is the strongest independent cross-lens convergence in the council and is supported directionally (not quantitatively versus compute) by the primary source; it points the contribution surface at data and simulation infrastructure rather than actuators.  ·  Codex: not the ONLY binding constraint — hardware, tactile sensing, integration, safety, and unit economics also bind by task. Read as &#x27;a major, often the bottleneck for generalization.&#x27;</p>
+      <div class="gauge mid">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>6</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Practitioner</span><span class="tag tag--support">Researcher</span><span class="tag tag--support">Skeptic</span><span class="tag tag--support">Economist</span><span class="tag tag--support">Historian</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>Narrow industrial VLA wins are a real pattern; the vendor numbers are not yet trustworthy</h3>
+        <span class="rank">#8</span>
+      </div>
+      <p class="body">Narrow industrial VLA deployments sit on a real, independently documented structural pattern: fixed-station, fault-tolerant material-handling is where VLAs pay off now. Figure 02 (Helix VLA) ran ~11 months at BMW Spartanburg on sheet-metal loading, and Apptronik Apollo is piloting intra-logistics (tote moves, kitting) at Mercedes-Benz (Berlin-Marienfelde / Kecskemet) — both confirmed by trade press and company announcements. CORRECTION to the original: the specific counts (&#x27;90,000+ parts loaded,&#x27; &#x27;30,000+ X3 vehicles,&#x27; &#x27;1,250+ hours&#x27;) are NOT merely &#x27;sourced via SEO blogs&#x27; — they originate from Figure AI&#x27;s own announcement (figure.ai/news/production-at-bmw) and were echoed by reputable trade press (Interesting Engineering, ASSEMBLY, BGR). The two cited SEO blogs are downstream echoes of that vendor claim. They remain UNAUDITED: no independent third party has verified them, and the only throughput KPIs (84s cycle time, &gt;99% accuracy) are also vendor-published. Net: treat the deployment pattern as real and well-documented, but treat the precise counts and KPIs as vendor self-reporting until independently audited.  ·  Codex: &#x27;real pattern&#x27; may be premature — a few announced pilots are not a pattern without independent uptime/ROI/renewal evidence.</p>
+      <div class="gauge mid">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>6</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Practitioner</span><span class="tag tag--support">Researcher</span><span class="tag tag--challenge">Skeptic</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>LIVE: pace of VLA generalization — workable trajectory vs structurally capped for years</h3>
+        <span class="rank">#9</span>
+      </div>
+      <p class="body">Live disagreement on pace. The researcher reads π0.5 cleaning entirely new homes (its mobile-manipulation generalization scales with the number of distinct training homes, from 3 to 104) as a workable, if data-bound, trajectory. The skeptic and historian read action-data supply as physically throttled (no internet of trajectories — action-paired sensorimotor data does not exist at internet scale — and teleop bottlenecked at roughly 5–50 episodes per operator-hour), capping progress for years not months, and reject hockey-stick autonomy timelines. Slight edge to the slower read: π0.5 confirms rather than refutes the data-diversity dependence (the paper itself shows 3 homes generalizes poorly while a 104-home co-trained model matches one trained directly on the test homes — co-training/knowledge transfer is &quot;essential for effective generalization,&quot; so you buy generalization, it does not emerge from scale alone). Plan your learning around the slower curve. (Note: the teleop-throughput figure comes from a commercial data-vendor blog, not a peer-reviewed source.)</p>
+      <div class="gauge mid">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>6</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Researcher</span><span class="tag tag--challenge">Skeptic</span><span class="tag tag--challenge">Historian</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>Flagship humanoid &#x27;deployments&#x27; are teleoperated data-collection, not autonomous work</h3>
+        <span class="rank">#10</span>
+      </div>
+      <p class="body">The thesis holds and is well-corroborated: today&#x27;s headline humanoid robots are running on teleoperation and data-collection, not autonomous productive work. 1X NEO is explicitly teleop-first — The Robot Report (Nov 21 2025) calls teleop &quot;the path&quot; and notes a major gap to the promised autonomy, and Engadget (Oct 29 2025) reports 1X&#x27;s own disclosure that buyers must agree a human operator sees inside their home through the robot&#x27;s camera, with CEO Bernt Børnich admitting &quot;much of the work will be done by teleoperators in the beginning.&quot; Tesla Optimus&#x27;s teleoperation history is likewise documented on Wikipedia: promo-video tasks &quot;required the use of teleoperation,&quot; and at the Oct 2024 &quot;We, Robot&quot; event &quot;the robots mainly used teleoperation to interact with crowds,&quot; with Tesla criticized for not being transparent about it. CORRECTION TO THE ANCHOR: the finding&#x27;s load-bearing claim — Musk&#x27;s &quot;Q4 2025 earnings-call concession (28 Jan 2026)&quot; that no Optimus does &quot;useful work&quot; and units are &quot;primarily for learning and data collection&quot; — is NOT in the cited Wikipedia page. That page has no Q4 2025 call, no 28 Jan 2026 date, and no &quot;data collection&quot; language; its single &quot;useful work&quot; mention is forward-looking aspiration (Musk expecting the AI5 chip to enable useful work), the opposite of a concession. The quote may exist in the real Jan 28 2026 call per secondary blog sources, but it is misattributed here to a source that does not contain it, so the &quot;reliability 10&quot; is overstated. The practical takeaway stands: when a vendor says &quot;autonomous,&quot; assume a human in the loop until a third-party throughput KPI proves otherwise.  ·  Codex: &#x27;proves&#x27; is too strong for a brief — read as &#x27;best interpreted as substantially teleop / data-collection-led.&#x27;</p>
+      <div class="gauge mid">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>5</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Practitioner</span><span class="tag tag--support">Researcher</span><span class="tag tag--support">Skeptic</span><span class="tag tag--support">Economist</span><span class="tag tag--support">Historian</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>&#x27;World model&#x27; is two programs; only the synthetic-data engine is deployable now</h3>
+        <span class="rank">#11</span>
+      </div>
+      <p class="body">The two-paradigm distinction is sound and worth keeping: (a) generative-video &quot;world models&quot; sold as synthetic-data engines (NVIDIA Cosmos, DeepMind Genie 2/3) versus (b) predictive latent world models for planning and control (V-JEPA 2, DreamerV3). The cited primary sources confirm (a): NVIDIA&#x27;s page explicitly markets Cosmos as deployable &quot;World Foundation Models for Physical AI&quot; with synthetic-video-data generation (Download Models, open, ~2M downloads), and Wikipedia confirms Genie 2/3 as generative interactive world models used to train agents and simulate AV edge cases. Two caveats correct the original&#x27;s overreach: (1) NVIDIA itself markets Cosmos&#x27;s closed-loop world simulation and &quot;World Action Models&quot; for robot policy as available, so &quot;only synthetic-data generation is deployable&quot; is the marketing-skeptic&#x27;s read, not an uncontested fact; Genie 3 is still a limited research preview / subscriber-only Project Genie. (2) The skeptical physics claims are real but MISATTRIBUTED in this finding. The Introl article does NOT cite Kang et al. and contains no LeCun &quot;pixel-reconstruction is doomed&quot; quote; in fact it argues the opposite, that video generation increasingly learns physics (Sora 2, Runway Gen-4.5). The supporting evidence does exist independently — Kang et al. 2024, &quot;How Far is Video Generation from World Model: A Physical Law Perspective,&quot; found video models memorize rather than generalize physical laws, and LeCun has publicly called pixel-prediction &quot;doomed&quot; in favor of JEPA — but those should be cited to their own primary sources, not to the Introl blog. Net: keep the two-uses-of-&#x27;world-model&#x27; framing as a useful lens, but treat the &quot;scaling video gen yields no transferable physics&quot; line as supported by Kang et al. directly (not Introl), and soften &quot;only synthetic data is deployable&quot; to &quot;synthetic-data generation is the most mature, broadly shipping use; closed-loop control from a dreamed world remains earlier-stage.&quot;</p>
+      <div class="gauge mid">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>5</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Researcher</span><span class="tag tag--support">Historian</span><span class="tag tag--support">Skeptic</span><span class="tag tag--support">Economist</span></div>
+    </article>
+    
+
+    <article class="finding">
+      <div class="top">
+        <h3>Invest in transferable skills and the substrate, never in one company&#x27;s equity</h3>
+        <span class="rank">#12</span>
+      </div>
+      <p class="body">Robotics startups fail at high rates and are markedly more capital-intensive than software, with death usually driven by financing-window timing — and the first humanoid-robot shutdown wave has now begun. (Note: the precise figures in the original — &quot;roughly 99% mortality&quot; and &quot;2-3x software&#x27;s capital intensity&quot; — are NOT supported by any cited source; the Six Degrees article gives only qualitative claims that robotics is &quot;capital-intensive&quot; and that companies &quot;starve&quot; without repeated capital. The 36Kr source strongly confirms the first humanoid shutdown wave, Jan 2026, with named casualties: K-Scale Labs, iRobot, Aldebaran, United Robotics Group.) The capability inflection compounds regardless, and prior cycles seeded durable institutions and a talent diaspora. The cited DARPA source supports the &quot;durable institutions / proliferating commercial applications&quot; half of this, but does NOT support the specific &quot;DARPA winners to Waymo&quot; diaspora claim (it&#x27;s a 2014 article with no mention of Google, Waymo, or anyone moving to industry); the &quot;Covariant founders to Amazon&quot; example is uncited. These reconcile cleanly: company equity dies, human capital and methods survive. The strategic position holds — invest in transferable skills and the substrate, never in any single company&#x27;s equity or hardware narrative — but it rests on a qualitative, not quantitative, evidence base.  ·  Codex: &#x27;never&#x27; is overbroad and outside the evidence base — reframe as &#x27;don&#x27;t anchor career capital on one vendor/equity story.&#x27;</p>
+      <div class="gauge mid">
+        <div class="segs"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="score">Reliability <b>4</b>/10</div>
+      </div>
+      <div class="tags"><span class="tag tag--support">Economist</span><span class="tag tag--support">Historian</span><span class="tag tag--support">Practitioner</span><span class="tag tag--support">Skeptic</span></div>
+    </article>
+    
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="idx">02</span><h2>Assumptions this briefing rests on</h2><span class="rule"></span></div>
+    <ul class="assume">
+      
+      <li><span>Many load-bearing numbers (deployment counts, the $6.70/hour ROI, BOM curves, teleop unit economics, the $3B robot-data spend) come from SEO/content-marketing blogs, not primary sources; they are directional only. The structural conclusions hold without them, but no single figure should anchor a plan.</span></li>
+      
+
+      <li><span>Several pivotal arXiv citations are very recent or future-dated (2026 IDs) and were not independently verified in this council. The qualitative conclusions survive without them, but specific benchmark claims must be confirmed before being quoted as authority.</span></li>
+      
+
+      <li><span>The 12-18 month window makes far-dated TAM forecasts ($5-7T by 2050, $38B by 2035) irrelevant to the decision; the two-orders-of-magnitude dispersion is the only signal. The bet rests entirely on near-term substrate value, not market-size timing.</span></li>
+      
+
+      <li><span>The recommendation assumes Gera&#x27;s profile stays fixed (software-strong, sim-first, not owning hardware), and that the open VLA + open sim ecosystem (OpenVLA, openpi, GR00T, Isaac Lab, MuJoCo) stays open and accessible; the whole &#x27;build the substrate&#x27; bet depends on it.</span></li>
+      
+
+      <li><span>The &#x27;five independent lenses agree&#x27; framing slightly overstates independence: lenses drew on overlapping sources (the same Optimus Wikipedia page, the same data-economics blogs), so part of the apparent corroboration is shared-source rather than fully independent.</span></li>
+      
+
+      <li><span>Cross-lineage review (Codex) flags these as UNDER-COVERED — treat the brief as a strategic map, not an implementation plan: integration economics (workcell/maintenance/fleet ops), human-in-the-loop teleop economics, data-flywheel/incident-replay loops, robot middleware (ROS 2 / Isaac / MuJoCo), the tactile + end-effector ecosystem, and safety standards (ISO 10218 / ISO-TS 15066).</span></li>
+      
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="idx">03</span><h2>The lens nobody sat in</h2><span class="rule"></span></div>
+    <div class="missing">
+      <div class="eyebrow"><span class="ic"></span>Missing perspective</div>
+      <h3>Safety, assurance, and regulatory engineer (the seat between &#x27;works in a demo&#x27; and &#x27;runs a shift with humans nearby&#x27;)</h3>
+      <p>All five lenses are capability-, money-, or history-shaped; none owns the question of how a learned policy becomes certifiable, safe, and insurable in a real workcell with people in it. That is exactly what converts the narrow, durable deployments everyone agrees on into shipped products, and it is software-heavy: runtime safety monitors, empirical/formal verification of learned controllers, anomaly detection, assurance cases, and functional-safety standards (ISO 10218 / safety-rated control). For a software-strong engineer it is an entire underbuilt build lane the council never surfaced, and it directly attacks the last-10% reliability wall the practitioner names. Its absence means the briefing under-weights the certification and liability barrier that historically gates deployment and slightly over-weights raw capability.</p>
+      <div class="cta">→ Run V3 with this lens added</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="idx">04</span><h2>Sources ledger</h2><span class="rule"></span></div>
+    <div class="ledger">
+      
+      <div class="row">
+        <span class="st st--corrected">Corrected</span>
+        <span class="src"><a href="https://en.wikipedia.org/wiki/Optimus_(robot)">Optimus (robot) — Wikipedia (Q4 2025 call, teleoperation history)</a><span class="note">Teleoperation-history half CONFIRMED: page states promo-video tasks &#x27;required the use of teleoperation&#x27; and at the Oct 2024 &#x27;We, Robot&#x27; event &#x27;the robots mainly used teleoperation to interact with crowds; Tesla was also criticized for not being transparent about this.&#x27; But the cited &#x27;Q4 2025 call&#x27; anchor is ABSENT: zero hits for &#x27;Q4 2025&#x27;, &#x27;28 January / January 2026&#x27;, &#x27;data collection&#x27;, or &#x27;primarily for learning&#x27;. The page&#x27;s only &#x27;useful work&#x27; mention is forward-looking (&#x27;Musk expects the new AI5 chip... to do useful work even if it loses WiFi&#x27;), the opposite of a concession that no Optimus does useful work. The earnings calls it references are Q1 2026 (22 Apr 2026), not a Q4 2025 call. Citation title misrepresents the page&#x27;s content.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://www.therobotreport.com/teleop-not-autonomy-the-path-for-1x-neo-humanoid/">Teleop, not autonomy, is the path for 1X&#x27;s Neo humanoid — The Robot Report</a><span class="note">Title and byline match (Steve Crowe, Nov 21 2025). Explicitly states NEO has &#x27;strong manipulation and teleoperation skills&#x27; but &#x27;a major gap between what NEO can do today and the autonomous robot the company is promising to deliver to consumers in 2026&#x27;; argues 1X should &#x27;lean into teleoperation&#x27; as the realistic path; $20,000 price stated; flags that &#x27;a teleoperated robot in the home raises privacy concerns.&#x27; Fully supports the teleop-not-autonomy claim for NEO.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://www.engadget.com/ai/1x-neo-is-a-20000-home-robot-that-will-learn-chores-via-teleoperation-040252200.html">1X Neo is a $20,000 home robot that will learn chores via teleoperation — Engadget</a><span class="note">Title and date match (published Oct 29 2025). Directly supports the 1X privacy-disclosure claim: CEO Bernt Børnich said &#x27;anybody who buys NEO for delivery next year will have to agree that a human operator will be seeing inside their houses through the robot&#x27;s camera&#x27; to gather training data, and &#x27;admitted that much of the work will be done by teleoperators in the beginning.&#x27; Owners can blur people / set no-go zones. $20,000 price confirmed. Note the disclosure is sourced to a WSJ interview + buyer agreement rather than a formal published &#x27;privacy policy,&#x27; but the substance (&#x27;human operators pilot NEO through buyers&#x27; homes&#x27;) is accurate.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://arxiv.org/html/2310.08864v9">Open X-Embodiment: Robotic Learning Datasets and RT-X Models (arXiv 2310.08864)</a><span class="note">HTTP 200. Primary paper states verbatim: &#x27;Open X-Embodiment Dataset: robot learning dataset with 1M+ robot trajectories from 22 robot embodiments&#x27; and &#x27;pooling 60 existing robot datasets from 34 robotic research labs.&#x27; Also supports the scarcity framing (&#x27;Even the largest data collection efforts still end up with datasets that are a fraction of the size and diversity&#x27;) and names teleoperated demonstrations as a collection method. Directly confirms the &#x27;~1M trajectories, largest open corpus&#x27; claim.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://deepmind.google/blog/scaling-up-learning-across-many-different-robot-types/">Scaling up learning across many different robot types — Google DeepMind</a><span class="note">HTTP 200. States &#x27;22 robot embodiments, demonstrating more than 500 skills and 150,000 tasks across more than 1 million episodes. This dataset is the most comprehensive robotics dataset of its kind,&#x27; pooled across 33 academic labs. Confirms scale (&gt;1M episodes) and largest/most-comprehensive framing. Does not quantify teleoperation throughput or compare against compute/hardware cost.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://github.com/Physical-Intelligence/openpi">openpi — Physical Intelligence open π models/code (GitHub)</a><span class="note">README confirms open-source VLA models/code from the Physical Intelligence team: π0 (flow-based VLA), π0-FAST (autoregressive), π0.5 (better open-world generalization). Provides base checkpoints pre-trained on 10k+ hours of robot data plus LoRA/full fine-tuning workflows and expert checkpoints; π0.5-LIBERO gets SOTA on the LIBERO sim benchmark. Directly supports the finding&#x27;s VLA fine-tuning and open-ecosystem (openpi) claims.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://d1qx31qr3h6wln.cloudfront.net/publications/Isaac%20Lab,%20A%20GPU-Accelerated%20Simulation%20Framework%20for%20Multi-Modal%20Robot%20Learning.pdf">Isaac Lab: A GPU-Accelerated Simulation Framework for Multi-Modal Robot Learning</a><span class="note">Valid 54-page NVIDIA PDF dated 2025-09-28; title matches the citation exactly. Abstract: successor to Isaac Gym; GPU-native parallel physics + photorealistic rendering; integrates actuator models, sensor sim, data-collection pipelines, and domain-randomization tools; unifies RL and imitation learning at scale; Fig.1 caption notes features to facilitate sim-to-real transfer; open source. Supports the sim/sim2real, data-pipeline, synthetic-data, and in-sim evaluation claims.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://arxiv.org/abs/2510.06710">RLinf-VLA: a framework for RL of Vision-Language-Action Models (arXiv 2510.06710)</a><span class="note">arXiv title exactly matches: &#x27;RLinf-VLA: A Unified and Efficient Framework for Reinforcement Learning of Vision-Language-Action Models&#x27; (submitted 2025-10-08). Abstract confirms a unified, efficient framework for scalable RL training of VLAs across heterogeneous and GPU-parallelized simulators, with ~20-85% gains across multiple simulation benchmarks (LIBERO, ManiSkill, RoboTwin). Supports the RL-fine-tuning-of-VLAs and evaluation/benchmark-harness claims.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://rodneybrooks.com/why-todays-humanoids-wont-learn-dexterity/">Rodney Brooks — Why Today&#x27;s Humanoids Won&#x27;t Learn Dexterity</a><span class="note">Title and thesis match exactly. Brooks: today&#x27;s humanoids &#x27;will not learn how to be dexterous despite the hundreds of millions, or perhaps many billions of dollars&#x27; in funding; &#x27;the hype around humanoid robots comes from the idea that they will be a general purpose machine that can do any manual task that humans can do&#x27;; he builds warehouse robots (narrow), says no cost/benefit case for home humanoids, and himself draws the robotaxi analogy. Directly supports the overhype-vs-narrow claim.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://www.mckinsey.com/industries/industrials-and-electronics/our-insights/humanoid-robots-crossing-the-chasm-from-concept-to-commercial-reality">Humanoid robots: crossing the chasm from concept to commercial reality — McKinsey</a><span class="note">Content fully supports the narrow/structured/economically-bounded thesis: first pilots are repetitive tasks in structured low-variability environments (mapped factory aisles, controlled warehouse lanes), Agility/Amazon tote movement in semisegregated zones, BMW/Figure intrafactory logistics; &#x27;today&#x27;s wins come from predictable routes and repeatable tasks, not from high-dexterity assembly.&#x27; CAVEAT: the exact cited URL path (industrials-and-electronics) failed to fetch; the live canonical path is /industrials/our-insights/... — same article (Oct 2025), verified via search.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://en.wikipedia.org/wiki/DARPA_Grand_Challenge">DARPA Grand Challenge — Wikipedia (AV timeline precedent)</a><span class="note">Confirms the AV-precedent anchor: first challenge 2004-03-13, no robot vehicle finished (best 11.78 km / 7.32 mi), 2005 Stanley/Stanford won the 212 km course, 2007 Urban Challenge — staged, narrow-first progress. CAVEAT: page stops at 2007 and does not itself state the &#x27;~20 years to Waymo&#x27;, &#x27;geofenced&#x27;, or &#x27;3-5x inflation&#x27; specifics; those are the finding&#x27;s synthesis (2004 to Waymo public driverless ~2020-2024 is ~16-20 yrs, broadly accurate).</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://arxiv.org/pdf/2507.00917">A Survey: Learning Embodied Intelligence from Physical Simulators and World Models (arXiv 2507.00917)</a><span class="note">Real, reachable, 49-page survey; title/authors match (Long, Zhao, Zhang et al.). Confirms the simulator landscape the finding names: dedicated chapter covering Isaac Gym/Sim/Lab, MuJoCo, and Genesis; notes Isaac Gym improved &#x27;sample efficiency in tasks such as locomotion control and policy learning for legged robots.&#x27; BUT contains NO &#x27;84%/93%/84-93&#x27; transfer figure, NO &#x27;Moravec&#x27;, and no statement equating/separating visual realism from physical accuracy (its one &#x27;visual realism&#x27; hit is about diffusion world models). Supports the qualitative simulator/locomotion claims only.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://rpg.ifi.uzh.ch/docs/AR25_Aljalbout.pdf">The Reality Gap in Robotics: Challenges, Solutions, Best Practices (Aljalbout et al., UZH)</a><span class="note">Real, reachable; authoritative on-topic source (Aljalbout, Xing, Romero, Scaramuzza + NVIDIA, to appear 2026 Annual Review of Control, Robotics, and Autonomous Systems). Actual title is &#x27;...Solutions, AND Best Practices&#x27; (trivial dropped &#x27;and&#x27;). Strongly supports the thesis: locomotion/navigation sim2real works (&#x27;very robust quadruped locomotion across challenging terrains... bipeds control&#x27;), and contact-rich manipulation gap is wide (&#x27;Contact Dynamics&#x27; gap section: friction/deformation/sticking-slipping, simplified contact models &#x27;fail to capture critical physical behaviors... particularly problematic in contact-rich tasks like robotic manipulation&#x27;; tactile sensors &#x27;idealized&#x27;). Lists &#x27;incorporating real-world data&#x27; + &#x27;sim-real co-training&#x27; as mitigations. BUT contains NO &#x27;84-93%&#x27; figure, NO &#x27;Moravec&#x27;, and no &#x27;teleop&#x27; mention.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://sixdegreesofrobotics.substack.com/p/why-robot-companies-fail-the-top">Why robot companies fail — the top lessons (Six Degrees of Robotics)</a><span class="note">Reachable. Confirms the QUALITATIVE claim: &#x27;Trouble Getting Capital&#x27; is failure-reason #5 of 9; &#x27;Robotics is capital-intensive in ways outsiders rarely comprehend&#x27;; &#x27;Cash burn can exceed revenue for years&#x27;; VC pulls out when startups miss milestones — directly supports &#x27;financing-window timing&#x27; as a death driver. BUT contains NO &#x27;99% mortality&#x27; rate and NO &#x27;2-3x software&#x27; multiplier (zero percentage figures in the whole article). The precise numbers in the finding are unsupported by this source.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://eu.36kr.com/en/p/3657117189890433">The arrival of the first wave of humanoid robot shutdowns (36Kr)</a><span class="note">Reachable. Strong direct confirm of &#x27;the first humanoid shutdown wave has begun.&#x27; Title + lede: &#x27;The first wave of shutdowns of humanoid robot companies has arrived&#x27; (2026-01-27). Named casualties: K-Scale Labs (only $400k left), iRobot (Dec 2025 bankruptcy), Aldebaran (closed Feb 2025), United Robotics Group (2nd bankruptcy Aug 2025). States &#x27;The humanoid robot industry is extremely capital-intensive.&#x27; Best-supported pillar of the finding.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--corrected">Corrected</span>
+        <span class="src"><a href="https://www.darpa.mil/news/2014/grand-challenge-ten-years-later">The DARPA Grand Challenge: Ten Years Later — DARPA (talent diaspora)</a><span class="note">Reachable and on-topic for the Grand Challenge, but does NOT support the specific claim it is cited for. It confirms the challenge &#x27;created a community of innovators&#x27; and that &#x27;ten years later defense and commercial applications are proliferating&#x27; (Stanford&#x27;s Stanley, CMU&#x27;s Tartan Racing). It contains ZERO mentions of Google, Waymo, Thrun, Urmson, &#x27;talent,&#x27; or any diaspora/people-moving-to-companies narrative — and as a 2014 article it predates the Waymo name. The parenthetical &#x27;DARPA winners to Waymo&#x27; is an extrapolation not stated in this source; the source supports only the weaker &#x27;seeded durable institutions/technology&#x27; reading.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://arxiv.org/pdf/2510.13626">LIBERO-Plus: In-depth Robustness Analysis of VLA Models (arXiv 2510.13626)</a><span class="note">Reachable; real paper. Actual title expands VLA to &#x27;Vision-Language-Action Models.&#x27; Abstract directly supports OOD brittleness (seven perturbation dimensions incl. lighting, viewpoints, layout; 95%-&gt;below 30%) and the underbuilt-evaluation claim (&#x27;need for evaluation practices that assess reliability under realistic variation&#x27;). Also supports the reasoning-vs-execution framing: models &#x27;ignore language instructions completely&#x27; while being sensitive to physical/viewpoint perturbations.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://arxiv.org/pdf/2510.03827">LIBERO-PRO: Robust and Fair Evaluation of VLA Models Beyond Memorization (arXiv 2510.03827)</a><span class="note">Reachable; real paper. Actual title adds &#x27;Towards&#x27; (trivial). Strongest backing for the memorization claim: &gt;90% accuracy collapses to 0.0% under generalized settings, exposing &#x27;reliance on rote memorization of action sequences and environment layouts&#x27;; models keep grasping when the target is replaced by irrelevant items (distractors); explicitly calls current evaluation &#x27;severe flaws&#x27; / &#x27;misleading methodologies.&#x27;</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://arxiv.org/html/2505.15660v3">Exploring the Limits of VLA Manipulation in Cross-task Generalization (arXiv 2505.15660)</a><span class="note">Reachable; real paper (verified via the arXiv abstract record for 2505.15660; HTML v3 is the same work). Actual title: &#x27;Exploring the Limits of Vision-Language-Action Manipulations in Cross-task Generalization.&#x27; Supports unseen-task brittleness: introduces AGNOSTOS (23 unseen tasks); &#x27;current VLA models... struggle to generalize effectively to these unseen tasks.&#x27; A software/sim benchmark, reinforcing the &#x27;gap filled with software, not robots&#x27; point.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://www.nvidia.com/en-us/ai/cosmos/">NVIDIA Cosmos: World Foundation Models for Physical AI</a><span class="note">Reachable, on-point. Confirms Cosmos = &#x27;world foundation models&#x27; for &#x27;Physical AI&#x27; and explicitly markets synthetic-data generation (&#x27;Scale Synthetic Video Data&#x27;, &#x27;Agent Skills for Synthetic Data Generation&#x27;) plus deployability (Download Models, open frameworks, hosted catalog). Caveat that cuts against the finding: the same page also markets Cosmos as a &#x27;controllable, physics-grounded world simulator&#x27; for &#x27;closed loop&#x27; evaluation and &#x27;World Action Models&#x27; for robot policy, i.e. NVIDIA sells the closed-loop-control use as available too, weakening &#x27;only synthetic-data generation is deployable.&#x27;</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://en.wikipedia.org/wiki/Genie_(world_model)">Genie (world model) — overview of Genie 2/3</a><span class="note">Reachable. Confirms Genie 2/3 are DeepMind generative interactive world models used in &#x27;training AI agents&#x27; and autonomous-vehicle simulation (Waymo World Model). Supports the (a) generative-video framing. Nuance: Genie 3 is real-time but in limited research preview / subscriber-only Project Genie access, so &#x27;deployable today&#x27; applies only loosely to Genie.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--demoted">Demoted</span>
+        <span class="src"><a href="https://introl.com/blog/world-models-race-agi-2026">World Models Race 2026 — Introl (cites Kang et al. physical-law study)</a><span class="note">Reachable and on-topic, but does NOT support the load-bearing claims attributed to it. Full-text search found no &#x27;Kang&#x27;, no &#x27;physical law study&#x27;, no &#x27;doomed&#x27;, no &#x27;pixel&#x27;, no &#x27;V-JEPA&#x27;, no &#x27;Dreamer&#x27; — so the parenthetical &#x27;cites Kang et al. physical-law study&#x27; in the citation title is false. The article only mentions I-JEPA (LeCun&#x27;s image JEPA), not V-JEPA 2 or DreamerV3, and quotes LeCun on &#x27;LLMs are too limiting,&#x27; not on pixel-reconstruction. Critically, its &#x27;Video Generation as World Simulation&#x27; section argues the OPPOSITE of the finding&#x27;s skepticism: that the video-gen/world-model line is &#x27;blurring&#x27; and Sora 2 / Runway Gen-4.5 / Genie 3 increasingly do learn physics. The real support (Kang et al. 2024 &#x27;How Far is Video Generation from World Model&#x27;; LeCun&#x27;s &#x27;doomed&#x27; remarks) exists but must be cited to its own primary sources, not this blog.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://blog.robozaps.com/b/figure-ai-review">Figure AI Review: Robots, Helix AI &amp; Guide [2026] — Robozaps (vendor-sourced counts)</a><span class="note">Reachable (HTTP 200); title matches. Contains the exact figures cited: &#x27;1,250+ hours of runtime, 90,000+ parts loaded&#x27; and &#x27;30,000+ vehicles produced&#x27; at BMW Spartanburg. However it is a secondary SEO/affiliate review blog, not a primary or audited source — it echoes Figure AI&#x27;s own announcement (figure.ai/news/production-at-bmw). Confirms the claim as stated, but is weak provenance.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--demoted">Demoted</span>
+        <span class="src"><a href="https://newmarketpitch.com/blogs/news/humanoid-robotics-optimus-deployment-tracker">Tesla Optimus Deployment Tracker (2026) — New Market Pitch (no audited KPIs)</a><span class="note">Reachable (HTTP 200); title matches. But it is a Tesla OPTIMUS tracker, off-target for the Figure/Mercedes VLA claims it backs. Mentions Figure in a single passing line (&#x27;1,250+ operational hours at BMW producing 30,000 cars&#x27;), lacks the 90,000-parts figure, and contains no Mercedes/Apollo, Helix, pi0, or GR00T content. Its &#x27;No industrial KPIs published / No third party has verified&#x27; line refers to Optimus, not Figure — so its only verification value is generic mood, not support for the specific counts.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://arxiv.org/pdf/2411.12503">ManiSkill-ViTac 2025: Challenge on Manipulation with Vision and Tactile Sensing (arXiv 2411.12503)</a><span class="note">Verified by downloading the PDF. Genuine paper; actual title &#x27;ManiSkill-ViTac 2025: Challenge on Manipulation Skill Learning With Vision and Tactile Sensing&#x27; (cited title omits &#x27;Skill Learning&#x27; — trivial). Directly supports the claim: &#x27;performance in the real world is still far from satisfactory. Robustness and stability are still inferior, especially for contact-rich scenarios. One reason is that most works only use vision sensing, lacking the ability to detect contact status.&#x27; Includes a tactile-sensor-design track, implying current tactile hardware is still being developed. Strong support for the tactile-sensing-as-a-wall claim.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://rpg.ifi.uzh.ch/docs/AR25_Aljalbout.pdf">The Reality Gap in Robotics (Aljalbout et al., UZH)</a><span class="note">Verified by download. Real document: &#x27;The Reality Gap in Robotics: Challenges, Solutions, and Best Practices,&#x27; Aljalbout et al. (UZH Robotics and Perception Group + NVIDIA + UW/Sydney/Utah), arXiv:2510.20808, to appear in 2026 Annual Review of Control, Robotics, and Autonomous Systems. Has a dedicated &#x27;Contact Dynamics&#x27; subsection (&#x27;inaccurate modeling of physical contact... inherently complex and nonlinear&#x27;), plus friction (9), deformables (4), calibration (2), perception (27), grasp (9). Caveat: it is a sim-to-real/modeling-gap survey, supporting &#x27;physical/contact phenomena are a dominant hard gap&#x27; more than &#x27;hardware is inadequate&#x27;; the literal terms &#x27;clutter&#x27; and &#x27;gripper&#x27; do not appear (0 hits), so those specifics are paraphrase, not verbatim. Overall framing supported.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://arxiv.org/abs/2504.16054">π0.5: a VLA Model with Open-World Generalization (arXiv 2504.16054)</a><span class="note">Abstract verbatim: π0.5 is a VLA model whose co-training &#x27;knowledge transfer is essential for effective generalization&#x27; and that can perform &#x27;cleaning a kitchen or bedroom, in entirely new homes&#x27; — supports the cleaning-new-homes claim and the data-diversity-dependence interpretation. The &#x27;3 to 104 homes&#x27; figure is in the paper body (arxiv html v1): training on data from 3, 12, 22, 53, 82, 104 locations; 3 homes generalizes poorly, 104 generalizes well, and a control trained directly on test homes matches the 104-home co-trained model. Claim as stated is supported by the cited paper.</span></span>
+      </div>
+      
+
+      <div class="row">
+        <span class="st st--confirmed">Confirmed</span>
+        <span class="src"><a href="https://www.shaip.com/blog/robot-training-data-strategy/">Robot Training Data Strategy: Teleoperation vs Simulation vs Human Video — Shaip (teleop throughput)</a><span class="note">Page (HTTP 200, title matches) states verbatim &#x27;Teleoperation produces the highest-fidelity data but is bottlenecked at 5–50 episodes per operator-hour&#x27; (= &#x27;tens of episodes per operator-hour&#x27;) and &#x27;Data is the bottleneck in embodied AI because action-paired sensorimotor data does not exist at internet scale&#x27; (= &#x27;no internet of trajectories&#x27;); also calls teleop &#x27;slow, expensive, irreplaceable.&#x27; Caveat: Shaip is a commercial data-services vendor and the 5–50 figure is its own assertion without primary citation — moderate authority, not peer-reviewed.</span></span>
+      </div>
+      
+    </div>
+  </section>
+
+  <footer>
+    <div class="method">Method: <b style="color:var(--paper)">STORM</b> — five independent expert lenses → contradiction map → synthesis → adversarial citation verification (V1→V2). Cross-lineage final verdict via Codex.</div>
+    <div>Generated by Servy · /storm-research · 2026-06-29 · Reliability = agreement-under-scrutiny, not an average. Stanford STORM: stanford-oval/storm</div>
+  </footer>
+
+</div>
+</body>
+</html>

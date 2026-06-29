@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STORM — a research method for our R&D work</title>
+<meta name="description" content="STORM turns Claude into a five-perspective research team that argues with itself and verifies its sources. What it is, and how we could use it on R&D research tasks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..600&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#080d16; --ink-2:#0d1726; --panel:#101d2e; --panel-2:#0f1a2a;
+    --line:#1d2f44; --line-2:#2b4159;
+    --fog:#adbfd4; --fog-dim:#6f8499; --paper:#eef4fb;
+    --teal:#41dcc2; --teal-deep:#1c9485; --amber:#f6b24b; --sky:#5aa9f0; --rust:#e0735b;
+    --display:"Fraunces",Georgia,serif;
+    --body:"Newsreader",Georgia,serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --glow:0 0 0 1px #ffffff08, 0 24px 60px -30px #000a;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--fog);background:var(--ink);line-height:1.66;font-size:18px;
+    -webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+  ::selection{background:var(--teal-deep);color:#001}
+
+  /* Atmosphere */
+  .atmos{position:fixed;inset:0;z-index:-3;pointer-events:none;background:
+    radial-gradient(130% 90% at 10% -15%,#163149 0%,transparent 55%),
+    radial-gradient(90% 70% at 100% 0%,#16291f 0%,transparent 48%),
+    radial-gradient(150% 130% at 50% 118%,#0b1a2d 0%,transparent 60%),
+    linear-gradient(180deg,#080d16,#070b12);}
+  .isobars{position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.45;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='760' viewBox='0 0 1200 760'><g fill='none' stroke='%23264056' stroke-width='1'><path d='M-60 130 C 220 60 420 220 660 140 S 1080 40 1300 160'/><path d='M-60 215 C 240 160 440 300 680 225 S 1100 140 1300 245'/><path d='M-60 310 C 260 265 460 385 700 320 S 1110 245 1300 340'/><path d='M-60 415 C 270 385 470 490 720 425 S 1120 360 1300 450'/><path d='M-60 530 C 280 510 480 595 730 540 S 1130 480 1300 560'/><path d='M-60 650 C 290 635 490 700 750 655 S 1140 600 1300 675'/></g></svg>");
+    background-size:cover;mask-image:radial-gradient(130% 100% at 50% 0%,#000 25%,transparent 80%);}
+  .grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.045;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,52px)}
+  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--teal)}
+  .num{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--teal)}
+
+  /* ── Top bar ─────────────────────────────────────────────────────────── */
+  .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);
+    background:linear-gradient(180deg,#080d16e8,#080d1655);border-bottom:1px solid var(--line)}
+  .topbar .wrap{display:flex;justify-content:space-between;align-items:center;height:58px}
+  .brand{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--paper)}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 14px var(--teal);animation:pulse 3s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .topbar .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--fog-dim)}
+
+  /* ── Hero ────────────────────────────────────────────────────────────── */
+  .hero{padding:clamp(64px,11vw,128px) 0 clamp(48px,7vw,84px)}
+  .hero .eyebrow{margin-bottom:26px}
+  h1{font-family:var(--display);font-optical-sizing:auto;font-weight:540;color:var(--paper);
+    font-size:clamp(40px,7.6vw,82px);line-height:1.0;letter-spacing:-.02em;max-width:15ch}
+  h1 em{font-style:italic;color:var(--teal)}
+  .lede{font-family:var(--body);font-size:clamp(18px,2.3vw,22px);color:var(--fog);max-width:60ch;margin-top:30px;font-weight:340}
+  .byline{display:flex;flex-wrap:wrap;gap:12px;margin-top:38px}
+  .credit{display:flex;flex-direction:column;gap:3px;border:1px solid var(--line-2);border-radius:12px;padding:13px 18px;background:#0e1a2a66}
+  .credit .role{font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--fog-dim)}
+  .credit .who{font-family:var(--display);font-size:18px;color:var(--paper);font-weight:500}
+  .credit.co .who{color:var(--teal)}
+  .credit .who small{font-family:var(--mono);font-size:11px;color:var(--fog-dim);letter-spacing:.04em}
+
+  .scrollcue{margin-top:54px;display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--fog-dim)}
+  .scrollcue .ln{width:46px;height:1px;background:var(--line-2);position:relative;overflow:hidden}
+  .scrollcue .ln::after{content:"";position:absolute;inset:0;width:40%;background:var(--teal);animation:slide 2.4s ease-in-out infinite}
+  @keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(280%)}}
+
+  /* ── Section scaffolding ─────────────────────────────────────────────── */
+  section{padding:clamp(48px,7vw,86px) 0;border-top:1px solid var(--line)}
+  .sechead{display:flex;align-items:baseline;gap:16px;margin-bottom:34px}
+  .sechead .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line-2),transparent)}
+  h2{font-family:var(--display);font-weight:480;color:var(--paper);font-size:clamp(26px,4vw,40px);line-height:1.08;letter-spacing:-.015em;max-width:20ch}
+  .p{font-family:var(--body);font-size:19px;color:var(--fog);max-width:64ch;margin-top:16px;font-weight:340}
+  .p b{color:var(--paper);font-weight:540}
+  .p--lead{font-size:21px;color:var(--paper);font-weight:360}
+
+  /* ── Problem: split panel ────────────────────────────────────────────── */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:34px}
+  .panel{border:1px solid var(--line);border-radius:16px;padding:26px 28px;background:var(--panel-2)}
+  .panel.bad{border-color:#7a3a2e55}
+  .panel.good{border-color:var(--teal-deep);box-shadow:var(--glow)}
+  .panel .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .panel.bad .lbl{color:var(--rust)} .panel.good .lbl{color:var(--teal)}
+  .panel .lbl .ic{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font-size:12px}
+  .panel.bad .ic{border:1px solid #7a3a2e} .panel.good .ic{border:1px solid var(--teal-deep)}
+  .panel h3{font-family:var(--display);font-size:21px;color:var(--paper);font-weight:520;margin-bottom:8px}
+  .panel p{font-size:15.5px;color:var(--fog);font-family:var(--body)}
+  .panel ul{list-style:none;margin-top:14px;display:grid;gap:9px}
+  .panel li{font-family:var(--mono);font-size:12.5px;color:var(--fog);display:flex;gap:10px;line-height:1.5}
+  .panel li::before{content:"›";color:var(--fog-dim);flex:none}
+  .panel.good li::before{content:"✓";color:var(--teal)}
+
+  /* ── Stanford callout ────────────────────────────────────────────────── */
+  .quote{border-left:3px solid var(--teal);padding:6px 0 6px 28px;margin-top:30px;max-width:62ch}
+  .quote p{font-family:var(--display);font-style:italic;font-size:23px;line-height:1.42;color:var(--paper);font-weight:360}
+  .quote .src{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--fog-dim);margin-top:14px;text-transform:uppercase}
+
+  /* ── Process flow ────────────────────────────────────────────────────── */
+  .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:38px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel-2)}
+  .stage{padding:24px 20px;border-right:1px solid var(--line);position:relative}
+  .stage:last-child{border-right:none}
+  .stage .s-n{font-family:var(--mono);font-size:11px;color:var(--teal);letter-spacing:.18em}
+  .stage h4{font-family:var(--display);font-size:18px;color:var(--paper);font-weight:540;margin:11px 0 7px;line-height:1.12}
+  .stage p{font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--fog-dim)}
+  .stage .arrow{position:absolute;right:-7px;top:50%;transform:translateY(-50%);z-index:2;color:var(--teal);font-size:14px;background:var(--ink);border-radius:50%;width:16px;height:16px;display:grid;place-items:center}
+  .stage.terminal{background:linear-gradient(180deg,#11272430,transparent)}
+  .stage.terminal h4{color:var(--teal)}
+
+  /* ── Lens grid ───────────────────────────────────────────────────────── */
+  .lenses{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:34px}
+  .lens{border:1px solid var(--line);border-radius:14px;padding:20px 18px;background:var(--panel-2);transition:transform .25s,border-color .25s}
+  .lens:hover{transform:translateY(-4px);border-color:var(--line-2)}
+  .lens .ring{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--teal-deep);display:grid;place-items:center;font-family:var(--mono);font-size:13px;color:var(--teal);margin-bottom:14px}
+  .lens h4{font-family:var(--display);font-size:16.5px;color:var(--paper);font-weight:560;line-height:1.1;margin-bottom:7px}
+  .lens p{font-family:var(--mono);font-size:11px;line-height:1.62;color:var(--fog-dim)}
+  .lenses-note{font-family:var(--mono);font-size:12px;color:var(--fog-dim);margin-top:16px;letter-spacing:.02em}
+  .lenses-note b{color:var(--amber)}
+
+  /* ── Briefing anatomy ────────────────────────────────────────────────── */
+  .anat{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:34px}
+  .feat{border:1px solid var(--line);border-radius:14px;padding:22px 24px;background:var(--panel-2);display:flex;gap:18px;align-items:flex-start}
+  .feat .k{font-family:var(--mono);font-size:11px;color:var(--teal);letter-spacing:.14em;flex:none;width:34px;padding-top:3px}
+  .feat h4{font-family:var(--display);font-size:18px;color:var(--paper);font-weight:540;margin-bottom:5px}
+  .feat p{font-family:var(--body);font-size:15px;color:var(--fog)}
+  .feat .demo{margin-top:12px;display:flex;gap:3px}
+  .feat .seg{width:15px;height:8px;border-radius:2px;background:#34506b}
+  .feat .seg.on{background:var(--teal)}
+  .pills{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+  .pill{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid}
+  .pill.c{color:var(--teal);border-color:var(--teal-deep)}
+  .pill.w{color:var(--amber);border-color:#7a5a23}
+  .pill.d{color:var(--rust);border-color:#7a3a2e}
+
+  /* ── Use cases ───────────────────────────────────────────────────────── */
+  .cases{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:34px}
+  .case{border:1px solid var(--line);border-radius:16px;padding:26px 28px;background:linear-gradient(180deg,#0f1c2c,#0d1726);transition:transform .25s,border-color .25s;position:relative;overflow:hidden}
+  .case:hover{transform:translateY(-4px);border-color:var(--teal-deep)}
+  .case::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),transparent)}
+  .case .q{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--fog-dim);margin-bottom:12px}
+  .case h4{font-family:var(--display);font-size:21px;color:var(--paper);font-weight:520;line-height:1.18;margin-bottom:12px}
+  .case .roster{font-family:var(--mono);font-size:11.5px;color:var(--teal);line-height:1.7}
+  .case .roster span{color:var(--fog-dim)}
+  .case .catch{font-family:var(--body);font-size:14.5px;color:var(--fog);margin-top:13px;padding-top:13px;border-top:1px solid var(--line)}
+  .case .catch b{color:var(--paper);font-weight:540}
+
+  /* ── Versus ──────────────────────────────────────────────────────────── */
+  .versus{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:30px}
+  .vs{border:1px solid var(--line);border-radius:14px;padding:24px 26px;background:var(--panel-2)}
+  .vs .h{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--fog-dim);margin-bottom:12px}
+  .vs h4{font-family:var(--display);font-size:19px;color:var(--paper);font-weight:540;margin-bottom:9px}
+  .vs p{font-family:var(--body);font-size:15px;color:var(--fog)}
+  .vs .stat{font-family:var(--mono);font-size:11px;color:var(--teal);margin-top:13px;letter-spacing:.04em}
+
+  /* ── Boundary callout ────────────────────────────────────────────────── */
+  .boundary{border:1px solid #7a5a2355;border-radius:18px;padding:clamp(26px,4vw,40px);margin-top:14px;
+    background:linear-gradient(180deg,#241b0c40,#0f192880);position:relative;box-shadow:var(--glow)}
+  .boundary .top{display:flex;align-items:center;gap:13px;margin-bottom:16px}
+  .boundary .badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);border:1px solid #7a5a23;border-radius:999px;padding:5px 13px}
+  .boundary h2{color:var(--paper);font-size:clamp(24px,3.4vw,34px)}
+  .boundary p{font-family:var(--body);font-size:17.5px;color:var(--fog);max-width:70ch;margin-top:10px}
+  .boundary p b{color:var(--amber)}
+  .boundary .rules{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+  .boundary .rule{font-family:var(--mono);font-size:12.5px;color:var(--fog);line-height:1.6;border-left:2px solid;padding-left:14px}
+  .boundary .rule.ok{border-color:var(--teal)} .boundary .rule.no{border-color:var(--rust)}
+  .boundary .rule .t{display:block;color:var(--paper);font-weight:600;margin-bottom:3px;letter-spacing:.06em}
+
+  /* ── Start steps ─────────────────────────────────────────────────────── */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px}
+  .step{border:1px solid var(--line);border-radius:14px;padding:24px;background:var(--panel-2)}
+  .step .n{font-family:var(--display);font-size:34px;color:var(--teal);font-weight:600;line-height:1}
+  .step h4{font-family:var(--display);font-size:18px;color:var(--paper);font-weight:540;margin:12px 0 7px}
+  .step p{font-family:var(--body);font-size:15px;color:var(--fog)}
+  .step code{font-family:var(--mono);font-size:12px;color:var(--teal);background:#0a1420;padding:2px 6px;border-radius:5px}
+  .cta{margin-top:30px;display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;letter-spacing:.06em;color:var(--ink);background:var(--teal);padding:14px 24px;border-radius:11px;text-decoration:none;font-weight:600;transition:transform .2s}
+  .cta:hover{transform:translateY(-2px)}
+
+  /* ── Footer ──────────────────────────────────────────────────────────── */
+  footer{border-top:1px solid var(--line);padding:48px 0 64px;margin-top:20px}
+  .foot-credits{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:30px}
+  .foot-credits .credit{background:transparent}
+  .foot-meta{font-family:var(--mono);font-size:11.5px;color:var(--fog-dim);line-height:1.9;letter-spacing:.02em}
+  .foot-meta a{color:var(--fog)}
+  .foot-meta b{color:var(--fog)}
+
+  /* media — images + video */
+  .media{margin:36px 0 4px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel-2);box-shadow:var(--glow)}
+  .media img{display:block;width:100%;height:auto}
+  .media figcaption{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--fog-dim);padding:13px 20px;border-top:1px solid var(--line);text-transform:uppercase}
+  .videoband{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:clamp(44px,6vw,72px) 0;background:linear-gradient(180deg,#0d1a2a55,transparent)}
+  .videoband .eyebrow{margin-bottom:18px;display:flex;align-items:center;gap:14px}
+  .videoband .eyebrow::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line-2),transparent)}
+  .videoband h2{margin-bottom:10px}
+  .vshell{margin-top:28px;border:1px solid var(--line-2);border-radius:16px;overflow:hidden;box-shadow:var(--glow);background:#070b12}
+  .vshell video{display:block;width:100%;height:auto}
+
+  /* reveal */
+  .rise{opacity:0;transform:translateY(18px);animation:rise .8s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.rise{animation:none;opacity:1;transform:none}.scrollcue .ln::after,.brand .dot{animation:none}}
+
+  @media (max-width:880px){
+    .split,.anat,.cases,.versus,.boundary .rules,.foot-credits{grid-template-columns:1fr}
+    .flow,.lenses{grid-template-columns:1fr 1fr}
+    .stage{border-right:none;border-bottom:1px solid var(--line)} .stage .arrow{display:none}
+    .steps{grid-template-columns:1fr}
+  }
+  @media (max-width:520px){ .flow,.lenses{grid-template-columns:1fr} body{font-size:17px} }
+</style>
+</head>
+<body>
+<div class="atmos"></div><div class="isobars"></div><div class="grain"></div>
+
+<div class="topbar">
+  <div class="wrap">
+    <span class="brand"><span class="dot"></span>STORM</span>
+    <span class="tag">R&D · Research Methods · Internal share</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="eyebrow rise">A method I've been exploring</div>
+    <h1 class="rise" style="animation-delay:.05s">Turn Claude into a research team that <em>argues with itself.</em></h1>
+    <p class="lede rise" style="animation-delay:.12s">When we research something — a new framework, a build-vs-buy call, whether a tool fits a client — we usually ask one question and get one angle. <b style="color:var(--paper)">STORM</b> researches the same topic from five expert perspectives at once, maps where they disagree, and verifies every source before it trusts the answer. Here's what it is, and how we could use it on our research work.</p>
+    <div class="byline rise" style="animation-delay:.2s">
+      <div class="credit"><span class="role">Author</span><span class="who">Luis Gerardo Rodríguez García <small>· R&D Engineer</small></span></div>
+      <div class="credit co"><span class="role">Co-author</span><span class="who">Servy <small>· my agentic operating system</small></span></div>
+    </div>
+    <div class="scrollcue rise" style="animation-delay:.3s"><span class="ln"></span>Scroll — 6 minute read</div>
+  </header>
+
+  <!-- VIDEO ABSTRACT -->
+  <section class="videoband">
+    <div class="eyebrow">Watch · the 60-second version</div>
+    <h2>The whole idea, in under a minute.</h2>
+    <p class="p">Same method, narrated — for anyone who'd rather watch than read. Share the clip, then dive into the detail below.</p>
+    <div class="vshell">
+      <video controls preload="metadata" playsinline poster="2026-06-29-storm-explainer-poster.jpg">
+        <source src="2026-06-29-storm-explainer.mp4" type="video/mp4">
+        Your browser can't play embedded video — <a href="2026-06-29-storm-explainer.mp4">download the clip</a>.
+      </video>
+    </div>
+  </section>
+
+  <!-- 01 THE PROBLEM -->
+  <section>
+    <div class="sechead"><span class="num">01</span><h2>One prompt has one blind spot</h2><span class="rule"></span></div>
+    <p class="p p--lead">A single research prompt researches from a single angle — usually the way <em>we</em> happened to frame it. The model is tuned to agree with that framing. The questions we didn't think to ask stay invisible, and we walk away confident about an answer that was never stress-tested.</p>
+    <div class="split">
+      <div class="panel bad">
+        <div class="lbl"><span class="ic">✕</span>One prompt, one angle</div>
+        <h3>"Is framework X good for this?"</h3>
+        <p>You get a fluent, agreeable answer shaped by your framing.</p>
+        <ul>
+          <li>No one argued the other side</li>
+          <li>Cost, history, and real-world failure modes go unmentioned</li>
+          <li>Sources are listed, rarely checked</li>
+          <li>Confidence is uniform — and unearned</li>
+        </ul>
+      </div>
+      <div class="panel good">
+        <div class="lbl"><span class="ic">✓</span>Five lenses + verification</div>
+        <h3>The same question, five experts</h3>
+        <p>Each angle finds the holes the others miss; then every claim is checked.</p>
+        <ul>
+          <li>A skeptic actively tries to break the claim</li>
+          <li>Cost, precedent, and practice each get their own seat</li>
+          <li>Every citation is verified against its primary source</li>
+          <li>Findings are ranked by how well they survived scrutiny</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 WHAT IS STORM -->
+  <section>
+    <div class="sechead"><span class="num">02</span><h2>STORM is a Stanford research method</h2><span class="rule"></span></div>
+    <p class="p"><b>STORM</b> — <em>Synthesis of Topic Outlines through Retrieval and Multi-perspective Question Asking</em> — is a peer-reviewed method from Stanford's OVAL lab (NAACL 2024). Its core finding: researching a topic from many <b>discovered perspectives</b>, where each asks its own questions, produces measurably more organized and broader coverage than a single pass. The real work happens <em>before</em> the writing — in how widely the topic gets interrogated.</p>
+    <div class="quote">
+      <p>"The more independent perspectives you have researching and contradicting each other, the more holistic the result. If you don't have the expertise, borrow it — spin up agents as little experts to kill your own blind spots."</p>
+      <div class="src">The principle, adapted into a Claude skill</div>
+    </div>
+    <p class="p">I took that principle and packaged it into a reusable Claude skill, so one command runs the whole pipeline and returns a briefing that always looks the same.</p>
+    <figure class="media"><img src="images/hero.png" alt="Five instrument-lenses casting beams of light that converge on a single glowing topic"><figcaption>Five angles, one topic — each lens lighting up what the others miss.</figcaption></figure>
+  </section>
+
+  <!-- 03 HOW IT WORKS -->
+  <section>
+    <div class="sechead"><span class="num">03</span><h2>How the skill works</h2><span class="rule"></span></div>
+    <p class="p">You give it a topic and who the briefing is for. It runs four stages — five researchers in parallel, then a referee, then a synthesizer, then fact-checkers — and hands back a verified briefing.</p>
+    <div class="flow">
+      <div class="stage"><div class="s-n">01</div><h4>Five lenses</h4><p>Five expert agents research the topic in parallel — each blind to the others.</p><span class="arrow">›</span></div>
+      <div class="stage"><div class="s-n">02</div><h4>Contradiction map</h4><p>A referee finds where they disagree and which side has the stronger evidence.</p><span class="arrow">›</span></div>
+      <div class="stage"><div class="s-n">03</div><h4>Synthesis</h4><p>The angles converge into ranked findings — keeping the disagreements visible.</p><span class="arrow">›</span></div>
+      <div class="stage"><div class="s-n">04</div><h4>Verify</h4><p>Fact-checkers test every citation against its primary source. V1 → V2.</p><span class="arrow">›</span></div>
+      <div class="stage terminal"><div class="s-n">→</div><h4>Verified briefing</h4><p>A self-contained report you can read, share, and act on.</p></div>
+    </div>
+
+    <h3 style="font-family:var(--display);color:var(--paper);font-weight:480;font-size:22px;margin:46px 0 0">The five lenses</h3>
+    <div class="lenses">
+      <div class="lens"><div class="ring">P</div><h4>Practitioner</h4><p>What works in practice, what quietly breaks, what the docs never tell you.</p></div>
+      <div class="lens"><div class="ring">A</div><h4>Academic</h4><p>What the literature and benchmarks actually establish vs assume.</p></div>
+      <div class="lens"><div class="ring">S</div><h4>Skeptic</h4><p>Assumes the hype is wrong; hunts overclaims and failure modes.</p></div>
+      <div class="lens"><div class="ring">E</div><h4>Economist</h4><p>Follows the cost, ROI, incentives, and what breaks at scale.</p></div>
+      <div class="lens"><div class="ring">H</div><h4>Historian</h4><p>Precedent and trajectory — what's genuinely new vs recycled.</p></div>
+    </div>
+    <p class="lenses-note">The roster is the knob. <b>Swap or add a seat per topic</b> — a security/compliance lens for a vendor review, a client/buyer lens for a recommendation. The lens you forget is the one that bites.</p>
+    <figure class="media"><img src="images/lenses.png" alt="A central data-crystal examined from five sides by five differently-colored prisms"><figcaption>The same question, refracted through five independent experts.</figcaption></figure>
+  </section>
+
+  <!-- 04 BRIEFING ANATOMY -->
+  <section>
+    <div class="sechead"><span class="num">04</span><h2>What you get back</h2><span class="rule"></span></div>
+    <p class="p">Not a wall of text — a structured briefing where the trust is on the surface.</p>
+    <div class="anat">
+      <div class="feat"><span class="k">60s</span><div><h4>A 60-second summary</h4><p>The whole briefing, read in a minute, aimed at the decision you're making.</p></div></div>
+      <div class="feat"><span class="k">★</span><div><h4>Findings ranked by reliability</h4><p>Each finding carries a 1–10 score from agreement-under-scrutiny, not an average.<div class="demo"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span></div></p></div></div>
+      <div class="feat"><span class="k">⚖</span><div><h4>The assumptions it rests on</h4><p>Named explicitly — so you know what would have to be true for it to hold.</p></div></div>
+      <div class="feat"><span class="k">◎</span><div><h4>The missing lens</h4><p>The seat nobody sat in — and an offer to re-run with it added.</p></div></div>
+      <div class="feat" style="grid-column:1/-1"><span class="k">⛓</span><div><h4>A sources ledger</h4><p>Every citation checked against its primary source and marked:<div class="pills"><span class="pill c">Confirmed</span><span class="pill w">Corrected</span><span class="pill d">Demoted</span></div></p></div></div>
+    </div>
+    <figure class="media"><img src="images/verify.png" alt="Beams of light through prisms resolving into a ledger of confirmed and corrected checkmarks"><figcaption>Every citation checked against its source — confirmed, corrected, or demoted.</figcaption></figure>
+  </section>
+
+  <!-- 05 USE CASES -->
+  <section>
+    <div class="sechead"><span class="num">05</span><h2>How we'd use it on real R&D work</h2><span class="rule"></span></div>
+    <p class="p">The same shape as a lot of what we already do — just stress-tested. A few that map directly to our research tasks:</p>
+    <div class="cases">
+      <div class="case">
+        <div class="q">Tool / framework evaluation</div>
+        <h4>"Should we adopt &lt;tool&gt; for this engagement?"</h4>
+        <div class="roster">Lenses: Practitioner · Skeptic · Economist <span>+ an Integrator seat</span></div>
+        <p class="catch"><b>Catches:</b> the maturity gap between the demo and your stack, the hidden integration cost, the migration risk a vendor page won't mention.</p>
+      </div>
+      <div class="case">
+        <div class="q">Build vs buy vs open-source</div>
+        <h4>"What's the right way to get capability X?"</h4>
+        <div class="roster">Lenses: Economist · Practitioner · Academic · Skeptic</div>
+        <p class="catch"><b>Catches:</b> the true total cost of each path, and where "we'll just build it" quietly becomes a maintenance burden.</p>
+      </div>
+      <div class="case">
+        <div class="q">Maturity / readiness call</div>
+        <h4>"Is &lt;emerging technique&gt; ready to recommend?"</h4>
+        <div class="roster">Lenses: Academic · Skeptic · Practitioner <span>+ a Client seat</span></div>
+        <p class="catch"><b>Catches:</b> the difference between a strong paper and a production-ready pattern — with citations actually verified.</p>
+      </div>
+      <div class="case">
+        <div class="q">Landscape scan / workshop prep</div>
+        <h4>"Map the field before the architecture call."</h4>
+        <div class="roster">Lenses: Historian · Academic · Practitioner · Economist</div>
+        <p class="catch"><b>Catches:</b> what's been tried before, what's genuinely new, and the framing question you'd otherwise walk in without.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 WHY NOT JUST -->
+  <section>
+    <div class="sechead"><span class="num">06</span><h2>Why not just one good prompt?</h2><span class="rule"></span></div>
+    <div class="versus">
+      <div class="vs">
+        <div class="h">vs a single prompt</div>
+        <h4>Disagreement beats fluency</h4>
+        <p>One prompt gives you a confident answer. STORM gives you a confident answer <em>plus</em> the strongest case against it, and tells you which parts survived. You learn where the answer is solid and where it's thin.</p>
+      </div>
+      <div class="vs">
+        <div class="h">vs a flat deep-research sweep</div>
+        <h4>Verified &amp; tailored, not a brain-dump</h4>
+        <p>A broad sweep returns a lot of unranked text with few checked sources. STORM adds the contradiction map, reliability ranking, and citation verification — with about a dozen agents, not a hundred.</p>
+        <div class="stat">→ In the source demo, a different model (Codex) judged the verified briefing better on evidence, sourcing, and actionability.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 DATA BOUNDARY -->
+  <section>
+    <div class="boundary">
+      <div class="top"><span class="badge">Read this first</span></div>
+      <h2>The data boundary</h2>
+      <p>The lenses use <b>web search</b> — your topic and queries leave the machine. So this is a tool for <b>public, general research</b>: industry, tools, methods, markets, techniques. For anything client-specific or internal, run it inside <b>SoftServe-approved tooling</b> and never feed customer IP, code, or internal strategy into web-searching agents without the right approval. Same data-classification discipline we already apply everywhere else.</p>
+      <div class="rules">
+        <div class="rule ok"><span class="t">✓ Good fit</span>"Is this open-source framework production-ready?" · "How are teams doing X in 2026?" · "Compare these public tools."</div>
+        <div class="rule no"><span class="t">✕ Not here</span>Anything carrying customer data, a client's architecture, internal roadmaps, or engagement specifics → approved tooling only.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 GET STARTED -->
+  <section>
+    <div class="sechead"><span class="num">08</span><h2>Trying it</h2><span class="rule"></span></div>
+    <p class="p">It's a Claude Code skill — a short SOP file, a small workflow that fans out the agents, and a template that renders the briefing. The <em>principle</em> is portable to any agent setup; the packaging is what makes it one command.</p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h4>Pick a real topic</h4><p>Something contested or high-stakes you actually need to research — not a quick fact.</p></div>
+      <div class="step"><div class="n">2</div><h4>Frame the decision</h4><p>Who the briefing is for and what they'll decide with it. Tune the lens roster to the topic.</p></div>
+      <div class="step"><div class="n">3</div><h4>Run &amp; read</h4><p>One command runs <code>storm-research</code>; you get a verified briefing back. Then refine the lenses for next time.</p></div>
+    </div>
+  </section>
+
+  <!-- 09 SEE IT IN ACTION -->
+  <section>
+    <div class="sechead"><span class="num">09</span><h2>See it in action</h2><span class="rule"></span></div>
+    <p class="p p--lead">Not a mockup. Here's a real briefing STORM produced, start to finish, on a genuine research question: <b>the future of physical AI in robotics</b>.</p>
+    <p class="p">Eleven findings, each ranked by reliability, every source checked against its original, and a cross-model review that demoted the overconfident ones. This is the actual output, scrolling by:</p>
+    <div class="vshell">
+      <video controls preload="metadata" playsinline poster="2026-06-29-storm-demo-poster.jpg">
+        <source src="2026-06-29-storm-demo.mp4" type="video/mp4">
+        Your browser can't play embedded video — <a href="2026-06-29-storm-demo.mp4">download the demo</a>.
+      </video>
+    </div>
+    <p class="lenses-note">Generated by the skill, reviewed by a different model, and rendered automatically — the same pipeline you'd run on your own question. <a href="physical-ai-briefing.html" style="color:var(--sky);border-bottom:1px solid var(--line-2)">Open the full briefing →</a></p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-credits">
+      <div class="credit"><span class="role">Author</span><span class="who">Luis Gerardo Rodríguez García <small>· R&D Engineer</small></span></div>
+      <div class="credit co"><span class="role">Co-author</span><span class="who">Servy <small>· my agentic operating system</small></span></div>
+    </div>
+    <div class="foot-meta">
+      <b>Method:</b> STORM — five independent expert lenses → contradiction map → synthesis → adversarial citation verification (V1→V2).<br>
+      <b>Sources:</b> Nate Herk, "Stanford's Method Turns Claude Into a PHD Level Research Team" (2026) · Stanford OVAL, <b>STORM</b> (stanford-oval/storm, NAACL 2024).<br>
+      Built as a shared explainer for the R&D team · 2026-06-29 · An internal share, not a product pitch.
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
