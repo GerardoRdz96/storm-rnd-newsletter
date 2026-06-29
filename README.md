@@ -90,6 +90,8 @@ For anything client-specific or internal, run it inside **SoftServe-approved too
 The skill is in this repo — a Claude Code skill you can drop in and run. Full steps in **[skill/INSTALL.md](skill/INSTALL.md)**. The short version:
 
 ```bash
+git clone https://github.com/GerardoRdz96/storm-rnd-newsletter.git
+cd storm-rnd-newsletter
 cp -r skill/storm-research ~/.claude/skills/
 ```
 

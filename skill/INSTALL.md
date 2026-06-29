@@ -19,6 +19,16 @@ skill/storm-research/
 - **Web search** available to subagents (standard in Claude Code).
 - *Optional but recommended:* a second model CLI (e.g. Codex/GPT or Gemini) for the cross-model "final verdict" step. If you don't have one, skip Phase 4.5.
 
+## Get the files
+
+Clone (or download) this repo — the skill lives under `skill/storm-research/`:
+
+```bash
+git clone https://github.com/GerardoRdz96/storm-rnd-newsletter.git
+cd storm-rnd-newsletter
+```
+(Or on GitHub: **Code → Download ZIP**, then unzip and `cd` in.)
+
 ## Install
 
 **Option A — user-wide (available in every project):**
