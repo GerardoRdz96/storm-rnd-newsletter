@@ -61,11 +61,11 @@ Not a wall of text. A briefing with the trust on the surface:
 
 ## See it in action
 
-This is not a mockup. Here is a real briefing STORM produced, start to finish, on a genuine research question: **the future of physical AI in robotics**. Eleven findings, each ranked by reliability, every source checked, and a cross-model review (Codex) that demoted the overconfident ones.
+This is not a mockup. Here is a real briefing STORM produced, start to finish, on a genuine research question: **the future of physical AI in robotics**. Eleven findings, each ranked by reliability, every source checked, and a cross-model review (Codex) that demoted the overconfident ones. Don't take my word for it, open it and read the real thing.
 
-[![A real STORM briefing scrolling by, showing reliability gauges and verified findings](2026-06-29-storm-demo-poster.jpg)](2026-06-29-storm-demo.mp4)
+[![Preview of the verified STORM briefing on the future of physical AI in robotics](research-preview.png)](physical-ai-briefing.html)
 
-▶ **[Watch the demo](2026-06-29-storm-demo.mp4)** &nbsp;·&nbsp; 🔎 **[Open the full briefing](physical-ai-briefing.html)**
+🔎 **[Open the full verified briefing →](physical-ai-briefing.html)** &nbsp;—&nbsp; the actual output: reliability gauges, the assumptions, the missing lens, and the confirmed/corrected/demoted sources.
 
 ## How we'd use it on real R&D work
 
