@@ -85,9 +85,17 @@ For anything client-specific or internal, run it inside **SoftServe-approved too
 - ✅ **Good fit:** "Is this open-source framework production-ready?" · "How are teams doing X in 2026?" · "Compare these public tools."
 - 🚫 **Not here:** anything carrying customer data, a client's architecture, internal roadmaps, or engagement specifics → approved tooling only.
 
-## Trying it
+## Install it & try it yourself
 
-It's a Claude Code skill: a short SOP file, a small workflow that fans out the agents, and a template that renders the briefing. The principle is portable to any agent setup. Pick a real, contested topic, frame the decision, tune the lens roster, and run it.
+The skill is in this repo — a Claude Code skill you can drop in and run. Full steps in **[skill/INSTALL.md](skill/INSTALL.md)**. The short version:
+
+```bash
+cp -r skill/storm-research ~/.claude/skills/
+```
+
+Then, in Claude Code: `storm research <your topic>`. It scopes the question, runs the five lenses in parallel, verifies the sources, and renders a briefing like the one above.
+
+Requirements: Claude Code (with dynamic Workflows) + Python 3. The lenses use web search, so keep topics public — for sensitive research, use your organization's approved tooling.
 
 ---
 
